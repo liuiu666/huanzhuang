@@ -24,44 +24,57 @@ class CanvasPage extends React.Component {
     var points = [
       {
         x: 3,
-        y: 4,
-      },
-      {
-        x: 16,
-        y: 3,
-      },
-      {
-        x: 30,
-        y: 5,
-      },
-      {
-        x: 25,
         y: 55,
+      },
+      {
+        x: 50,
+        y: 55,
+      },
+
+      {
+        x: 50,
+        y: 100,
+      },
+      {
+        x: 3,
+        y: 100,
       },
     ];
     var polygon = new fabric.Polygon(points, {
       left: 100,
       top: 50,
-      fill: '#D81B60',
+      //  fill: '#D81B60',
       strokeWidth: 4,
-      stroke: 'green',
-      scaleX: 4,
-      scaleY: 4,
-      objectCaching: false,
-      transparentCorners: false,
-      cornerColor: 'blue',
+      // stroke: 'green',
+      // scaleX: 4,
+      // scaleY: 4,
+      // objectCaching: false,
+      // transparentCorners: false,
+      //cornerColor: 'blue',
     });
     canvas.viewportTransform = [0.7, 0, 0, 0.7, -50, 50];
     canvas.add(polygon);
+    function loadPattern(url) {
+      fabric.util.loadImage(url, function(img) {
+        polygon.fill = new fabric.Pattern({
+          source: img,
+          repeat: 'no-repeat',
+          position: 'center',
+        });
+        canvas.renderAll();
+      });
+    }
+    loadPattern(imgUrl);
+    //canvas.setOverlayImage(imgUrl, canvas.renderAll.bind(canvas));
+    // fabric.Image.fromURL(imgUrl, function(img) {
+    //   img.scale(0.5).set({
+    //     left: 150,
+    //     top: 150,
+    //     angle: -15,
+    //   });
 
-    fabric.Image.fromURL(imgUrl, function(img) {
-      // img.scale(0.5).set({
-      //   left: 150,
-      //   top: 150,
-      //   angle: -15,
-      // });
-      canvas.add(img).setActiveObject(img);
-    });
+    //   canvas.add(img).setActiveObject(img);
+    // });
 
     function polygonPositionHandler(dim, finalMatrix, fabricObject) {
       var x = fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x,
