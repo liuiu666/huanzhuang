@@ -1,0 +1,56 @@
+.home-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  :global {
+    header {
+      position: relative;
+      height: 55%;
+      .banner-number {
+        padding: 0.02rem 0.3rem;
+        border-radius: 0.4rem;
+        position: absolute;
+        color: #fff;
+        font-size: 0.28rem;
+        bottom: 0.4rem;
+        right: 0.4rem;
+        background: rgb(84, 85, 86);
+      }
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding: 0.4rem 0.4rem 0 0.4rem;
+      background: #ffffff;
+      .detail-item {
+        padding-bottom: 0.4rem;
+      }
+      .title {
+        color: rgb(197, 198, 199);
+        margin-right: 0.16rem;
+        font-size: 0.28rem;
+      }
+      .detail {
+        font-size: 0.28rem;
+        color: rgb(53, 53, 54);
+      }
+    }
+    .home-icon {
+      height: 1rem;
+      width: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgb(87, 88, 89);
+      border-radius: 50%;
+      position: fixed;
+      bottom: 0.4rem;
+      right: 0.4rem;
+      color: rgb(223, 224, 225);
+      font-size: 0.24rem;
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "cross-env ANALYZE=1 umi dev",
+    "dev-hmr": "cross-env HMR=none umi dev",
+    "build": "cross-env UMI_ENV=cloud umi build",
+    "postinstall": "umi generate tmp",
+    "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write"
+    ]
+  },
+  "dependencies": {
+    "@ice/stark": "^1.5.4",
+    "@ice/stark-app": "^1.2.0",
+    "@types/classnames": "^2.2.10",
+    "@umijs/test": "^3.2.3",
+    "antd-mobile": "^2.3.4",
+    "axios": "^0.21.0",
+    "cross-env": "^7.0.2",
+    "dingtalk-jsapi": "^2.13.9",
+    "echarts": "^4.9.0",
+    "install": "^0.13.0",
+    "lint-staged": "^10.0.7",
+    "lodash": "^4.17.19",
+    "npm": "^6.14.5",
+    "prettier": "^1.19.1",
+    "px2rem-loader": "^0.1.9",
+    "rc-form": "^2.4.11",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "umi": "^3.2.3",
+    "yorkie": "^2.0.0"
+  },
+  "devDependencies": {
+    "@umijs/preset-react": "^1.6.16"
+  }
+}
