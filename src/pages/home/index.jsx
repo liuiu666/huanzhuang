@@ -1,6 +1,6 @@
 import React from 'react';
 import { Carousel } from 'antd-mobile';
-
+import { history } from 'umi';
 import style from './index.less';
 
 // 信息-首页
@@ -55,7 +55,7 @@ class Home extends React.Component {
           </span>
         </header>
         <main>{this.renderDetailList()}</main>
-        <div className="home-icon">
+        <div className="home-icon" onClick={() => history.push('/canvas')}>
           <span>窗帘</span>
           <span>试装</span>
         </div>
