@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "dev": "cross-env ANALYZE=1 umi dev",
-    "dev-hmr": "cross-env HMR=none umi dev",
+    "dev": "cross-env umi dev",
+    "dev-hmr": "cross-env ANALYZE=1 HMR=none umi dev",
     "build": "cross-env UMI_ENV=cloud umi build",
     "postinstall": "umi generate tmp",
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'"

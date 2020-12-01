@@ -1,7 +1,6 @@
 import React from 'react';
 import './index.less';
-
-import HomePage from './home';
-export default function() {
-  return <HomePage />;
+import Detail from './detail';
+export default function(props) {
+  return <Detail {...props} />;
 }

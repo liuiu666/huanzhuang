@@ -1,7 +1,6 @@
 import productConfig from './axeConfig/productConfig';
 import { defineConfig } from 'umi';
-//const target = 'http://chendeli-local1.test.vaiwan.com';
-const target = 'http://anhuan-local.test.vaiwan.com';
+
 export default defineConfig({
   title: false,
   base: productConfig.productCode,
@@ -45,16 +44,10 @@ export default defineConfig({
     config.output.filename('app.js');
   },
   proxy: {
-    '/api': {
-      target: target,
-      // target: 'http://chendeli-local1.test.vaiwan.com',
+    '/smzj': {
+      target: 'https://smzj.sumeizhijia.com',
       changeOrigin: true,
       // pathRewrite: { '^/api': '' },
-    },
-    '/ding': {
-      target,
-      changeOrigin: true,
-      // pathRewrite: { '^/ding': '' },
     },
   },
 });

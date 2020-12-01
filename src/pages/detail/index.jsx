@@ -6,15 +6,11 @@ import style from './index.less';
 // 信息-首页
 class Home extends React.Component {
   state = {
-    bannerList: ['AiyWuByWklrrUDlFignR', 'TekJlZRVCjLFexlOCuWn', 'IJOtIlfsYdTyaDTRVrLI'],
+    bannerList: [],
     imgHeight: document.body.clientHeight * 0.55,
     bannerIndex: 1,
-    detail: [
-      {
-        title: '名称',
-        content: '345犀利',
-      },
-    ],
+    detail: [],
+    goodsid: this.props.location.query.goodsid || 9900000082,
   };
 
   componentDidMount() {
@@ -22,6 +18,21 @@ class Home extends React.Component {
       // 设置图片的高度
       this.setState({ imgHeight: document.body.clientHeight * 0.55 });
     });
+    this.handleGetDetaileList();
+  }
+
+  /**
+   * 获取详情数据
+   */
+  async handleGetDetaileList() {
+    const { goodsid } = this.state;
+    const response = await AXE_axios.post('/smzj/srCtr/wxQrGoodsid', { goodsid: goodsid });
+    if (response.status === 0 && response.data) {
+      this.setState({
+        bannerList: response.data.goodstopurl || [],
+        detail: response.data.categoryXcxQrs || [],
+      });
+    }
   }
 
   // 详情模块
@@ -31,8 +42,8 @@ class Home extends React.Component {
       <ul>
         {detail.map((item, index) => (
           <li className="detail-item" key={index}>
-            <span className="title">{item.title}:</span>
-            <span className="detail">{item.content}</span>
+            <span className="title">{item.superCategoryName}:</span>
+            <span className="detail">{item.categoryName}</span>
           </li>
         ))}
       </ul>
@@ -40,13 +51,22 @@ class Home extends React.Component {
   }
 
   render() {
+    const { goodsid } = this.state;
     return (
       <div className={style['home-page']}>
         <header className="ui_bottom_1px">
           <Carousel autoplay={true} infinite dots={false} afterChange={index => this.setState({ bannerIndex: index + 1 })}>
             {this.state.bannerList.map((val, i) => (
               <div className="banner-img" style={{ height: this.state.imgHeight }} key={i}>
-                <img src={`https://zos.alipayobjects.com/rmsportal/${val}.png`} alt="" style={{ width: '100%', height: '100%' }} />
+                <img
+                  src={val.goodstopurl}
+                  alt="图片加载中"
+                  style={{ width: '100%', height: '100%', verticalAlign: 'top' }}
+                  onLoad={() => {
+                    window.dispatchEvent(new Event('resize'));
+                    this.setState({ imgHeight: document.body.clientHeight * 0.55 });
+                  }}
+                />
               </div>
             ))}
           </Carousel>
@@ -55,7 +75,7 @@ class Home extends React.Component {
           </span>
         </header>
         <main>{this.renderDetailList()}</main>
-        <div className="home-icon" onClick={() => history.push('/canvas')}>
+        <div className="home-icon" onClick={() => history.push(`/canvas?goodsid=${goodsid}`)}>
           <span>窗帘</span>
           <span>试装</span>
         </div>

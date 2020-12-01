@@ -1,3 +1,27 @@
 .canvas-home {
   height: 100%;
+  .img-list {
+    position: fixed;
+    bottom: 0;
+    height: 20%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    > div {
+      flex: 1;
+    }
+    .img-item {
+      overflow-y: scroll;
+      display: flex;
+      flex-wrap: nowrap;
+      .img-conent {
+        height: 100%;
+        width: 1.302083rem;
+        min-width: 1.302083rem;
+      }
+    }
+    .img-item::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }

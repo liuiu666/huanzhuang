@@ -57,9 +57,9 @@ const instance = axios.create({
         if (typeof response === 'string') {
           response = JSON.parse(response);
         }
-        if (String(response.code) !== '200') {
-          Toast.fail(response.message || '服务异常', 1);
-        }
+        // if (String(response.code) !== '200') {
+        //   Toast.fail(response.message || '服务异常', 1);
+        // }
         return response;
       } catch (error) {
         console.error(error);
