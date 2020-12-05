@@ -1,4 +1,5 @@
 import React from 'react';
+import * as matrix from './matrix';
 import './index.less';
 class CanvasPage extends React.Component {
   state = {
@@ -11,8 +12,6 @@ class CanvasPage extends React.Component {
 
   componentDidMount() {
     this.handleGetCanvasData();
-
-    this.saveHeightWidth();
   }
 
   // 获取图片的列表数据
@@ -30,132 +29,160 @@ class CanvasPage extends React.Component {
           imgUrl: response.data.rows[0]['pictureurl'],
         },
         () => {
-          this.initialization();
+          this.renderCanvas();
         },
       );
     }
   }
 
-  // 设置图片的高度
-  saveHeightWidth() {
-    window.addEventListener('resize', () => {
-      this.setState({ height: document.body.clientHeight, width: document.body.clientWidth });
+  handleTouchStart = e => {
+    let { dots } = this.allData;
+    const { clientX, clientY } = e.touches[0];
+    let dot, i;
+    let qy = 40;
+    for (i = 0; i < dots.length; i++) {
+      dot = dots[i];
+      this.dotIndex = i;
+      if (clientY >= dot.y - qy && clientY <= dot.y + qy && clientX >= dot.x - qy && clientX <= dot.x + qy) {
+        break;
+      } else {
+        dot = null;
+      }
+    }
+    this.dot = dot;
+  };
+
+  listenCanvas = e => {
+    if (this.dot) {
+      const { clientX, clientY } = e.touches[0];
+      let { img, ctx, canvas, imgRatio, dots, idots, count } = this.allData;
+      dots[this.dotIndex].x = clientX;
+      dots[this.dotIndex].y = clientY;
+      this.renderFrontCanvas({ img, ctx, canvas, imgRatio, dots, idots, count });
+    }
+  };
+
+  renderCanvas = () => {
+    let imgRatio = 1,
+      dots = [],
+      dotscopy,
+      idots,
+      count = 30;
+
+    const canvas = document.getElementById('frontCanvas');
+    canvas.height = document.body.clientHeight;
+    canvas.width = document.body.clientWidth;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    //  img.src = require('../canvas/img.jpeg');
+    img.src = this.state.imgUrl;
+    const maxHeight = 200;
+    img.onload = () => {
+      let img_w = img.width,
+        img_h = img.height;
+      if (img_h > maxHeight) {
+        imgRatio = maxHeight / img_h;
+        img_h = maxHeight;
+        img_w *= imgRatio;
+      }
+      var left = (canvas.width - img_w) / 2;
+      var top = (canvas.height - img_h) / 2;
+
+      img.width = img_w;
+      img.height = img_h;
+      dots = [
+        { x: left, y: top },
+        { x: left + img_w, y: top },
+        { x: left + img_w, y: top + img_h },
+        { x: left, y: top + img_h },
+      ];
+
+      //保存一份不变的拷贝
+      dotscopy = [
+        { x: left, y: top },
+        { x: left + img_w, y: top },
+        { x: left + img_w, y: top + img_h },
+        { x: left, y: top + img_h },
+      ];
+      // 获得所有初始点坐标
+      idots = matrix.rectsplit(count, dotscopy[0], dotscopy[1], dotscopy[2], dotscopy[3]);
+      this.renderFrontCanvas({ img, ctx, canvas, imgRatio, dots, idots, count });
+      this.allData = { img, ctx, canvas, imgRatio, dots, idots, count };
+    };
+  };
+
+  renderFrontCanvas = ({ img, ctx, canvas, imgRatio, dots, idots, count }) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    var ndots = matrix.rectsplit(count, dots[0], dots[1], dots[2], dots[3]);
+    /**
+     * 计算矩阵，同时渲染图片
+     * @param arg_1
+     * @param _arg_1
+     * @param arg_2
+     * @param _arg_2
+     * @param arg_3
+     * @param _arg_3
+     */
+    function renderImage(arg_1, _arg_1, arg_2, _arg_2, arg_3, _arg_3, vertex) {
+      ctx.save();
+      //根据变换后的坐标创建剪切区域
+      ctx.beginPath();
+      ctx.moveTo(_arg_1.x, _arg_1.y);
+      ctx.lineTo(_arg_2.x, _arg_2.y);
+      ctx.lineTo(_arg_3.x, _arg_3.y);
+      ctx.closePath();
+      // if (hasRect) {
+      //   ctx.lineWidth = 2;
+      //   ctx.strokeStyle = 'red';
+      //   ctx.stroke();
+      // }
+      ctx.clip();
+
+      if (true) {
+        //传入变换前后的点坐标，计算变换矩阵
+        var result = matrix.getMatrix.apply(this, arguments);
+
+        //变形
+        ctx.transform(result.a, result.b, result.c, result.d, result.e, result.f);
+
+        var w = img.width / count;
+        var h = img.height / count;
+
+        //绘制图片
+        ctx.drawImage(img, (vertex.x - idots[0].x) / imgRatio - 1, (vertex.y - idots[0].y) / imgRatio - 1, w / imgRatio + 2, h / imgRatio + 2, vertex.x - 1, vertex.y - 1, w + 2, h + 2);
+      }
+
+      ctx.restore();
+    }
+
+    ndots.forEach(function(d, i) {
+      //获取平行四边形的四个点
+      var dot1 = ndots[i];
+      var dot2 = ndots[i + 1];
+      var dot3 = ndots[i + count + 2];
+      var dot4 = ndots[i + count + 1];
+
+      //获取初始平行四边形的四个点
+      var idot1 = idots[i];
+      var idot2 = idots[i + 1];
+      var idot3 = idots[i + count + 2];
+      var idot4 = idots[i + count + 1];
+
+      if (dot2 && dot3 && i % (count + 1) < count) {
+        //绘制三角形的下半部分
+        renderImage(idot3, dot3, idot2, dot2, idot4, dot4, idot1);
+
+        //绘制三角形的上半部分
+        renderImage(idot1, dot1, idot2, dot2, idot4, dot4, idot1);
+      }
+
+      // if (hasDot) {
+      //   ctx.fillStyle = 'red';
+      //   ctx.fillRect(d.x - 1, d.y - 1, 2, 2);
+      // }
     });
-  }
-
-  // 初始化
-  initialization() {
-    const { imgUrl } = this.state;
-    const canvas = new fabric.Canvas('canvas');
-    fabric.Image.fromURL(imgUrl, function(img) {
-      img.scale(0.3).set({
-        left: 50,
-        top: 50,
-        centeredRotation: true,
-      });
-      canvas.add(img).setActiveObject(img);
-    });
-    this.canvas = canvas;
-    // var points = [
-    //   {
-    //     x: 3,
-    //     y: 55,
-    //   },
-    //   {
-    //     x: 50,
-    //     y: 55,
-    //   },
-
-    //   {
-    //     x: 50,
-    //     y: 100,
-    //   },
-    //   {
-    //     x: 3,
-    //     y: 100,
-    //   },
-    // ];
-    // var polygon = new fabric.Polygon(points, {
-    //   left: 100,
-    //   top: 50,
-    //   //  fill: '#D81B60',
-    //   strokeWidth: 4,
-    //   // stroke: 'green',
-    //   // scaleX: 4,
-    //   // scaleY: 4,
-    //   // objectCaching: false,
-    //   // transparentCorners: false,
-    //   //cornerColor: 'blue',
-    // });
-    // canvas.viewportTransform = [0.7, 0, 0, 0.7, -50, 50];
-    // canvas.add(polygon);
-    // function loadPattern(url) {
-    //   fabric.util.loadImage(url, function(img) {
-    //     polygon.fill = new fabric.Pattern({
-    //       source: img,
-    //       repeat: 'no-repeat',
-    //       position: 'center',
-    //     });
-    //     canvas.renderAll();
-    //   });
-    // }
-    // loadPattern(imgUrl);
-    // canvas.setOverlayImage(imgUrl, canvas.renderAll.bind(canvas));
-
-    // function polygonPositionHandler(dim, finalMatrix, fabricObject) {
-    //   var x = fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x,
-    //     y = fabricObject.points[this.pointIndex].y - fabricObject.pathOffset.y;
-    //   return fabric.util.transformPoint({ x: x, y: y }, fabric.util.multiplyTransformMatrices(fabricObject.canvas.viewportTransform, fabricObject.calcTransformMatrix()));
-    // }
-
-    // function actionHandler(eventData, transform, x, y) {
-    //   var polygon = transform.target,
-    //     currentControl = polygon.controls[polygon.__corner],
-    //     mouseLocalPosition = polygon.toLocalPoint(new fabric.Point(x, y), 'center', 'center'),
-    //     polygonBaseSize = polygon._getNonTransformedDimensions(),
-    //     size = polygon._getTransformedDimensions(0, 0),
-    //     finalPointPosition = {
-    //       x: (mouseLocalPosition.x * polygonBaseSize.x) / size.x + polygon.pathOffset.x,
-    //       y: (mouseLocalPosition.y * polygonBaseSize.y) / size.y + polygon.pathOffset.y,
-    //     };
-    //   polygon.points[currentControl.pointIndex] = finalPointPosition;
-    //   return true;
-    // }
-
-    // function anchorWrapper(anchorIndex, fn) {
-    //   return function(eventData, transform, x, y) {
-    //     var fabricObject = transform.target,
-    //       absolutePoint = fabric.util.transformPoint(
-    //         {
-    //           x: fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x,
-    //           y: fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y,
-    //         },
-    //         fabricObject.calcTransformMatrix(),
-    //       ),
-    //       actionPerformed = fn(eventData, transform, x, y),
-    //       newDim = fabricObject._setPositionDimensions({}),
-    //       polygonBaseSize = fabricObject._getNonTransformedDimensions(),
-    //       newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / polygonBaseSize.x,
-    //       newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / polygonBaseSize.y;
-    //     fabricObject.setPositionByOrigin(absolutePoint, newX + 0.5, newY + 0.5);
-    //     return actionPerformed;
-    //   };
-    // }
-
-    // let poly = canvas.getObjects()[0];
-    // let lastControl = poly.points.length - 1;
-    // poly.cornerStyle = 'circle';
-    // poly.cornerColor = 'rgba(0,0,255,0.5)';
-    // poly.controls = poly.points.reduce(function(acc, point, index) {
-    //   acc['p' + index] = new fabric.Control({
-    //     positionHandler: polygonPositionHandler,
-    //     actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
-    //     actionName: 'modifyPolygon',
-    //     pointIndex: index,
-    //   });
-    //   return acc;
-    // }, {});
-  }
+  };
 
   // 底部图片渲染
   renderImgList() {
@@ -169,9 +196,14 @@ class CanvasPage extends React.Component {
               key={index}
               className="img-conent"
               onClick={() => {
-                this.setState({
-                  imgUrl: item.pictureurl,
-                });
+                this.setState(
+                  {
+                    imgUrl: item.pictureurl,
+                  },
+                  () => {
+                    this.renderCanvas();
+                  },
+                );
               }}
             >
               <img src={item.pictureurl} alt="图片加载中" style={{ width: '100%', height: '100%', verticalAlign: 'top' }} />
@@ -185,7 +217,7 @@ class CanvasPage extends React.Component {
   render() {
     return (
       <div className="canvas-home">
-        <canvas id="canvas" height={this.state.height} width={this.state.width}></canvas>
+        <canvas id="frontCanvas" onTouchMove={this.listenCanvas} onTouchStart={this.handleTouchStart}></canvas>
         {this.renderImgList()}
       </div>
     );

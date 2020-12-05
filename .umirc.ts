@@ -8,12 +8,6 @@ export default defineConfig({
   history: {
     type: 'hash',
   },
-  copy: [
-    {
-      from: 'src/static/fabric.js',
-      to: 'static/fabric.js',
-    },
-  ],
   theme: {},
   hash: false,
   outputPath: './build',
@@ -31,7 +25,7 @@ export default defineConfig({
   alias: {
     '@': './src',
   },
-  headScripts: [{ src: '/static/fabric.js' }],
+  //headScripts: [{ src: '/static/fabric.js' }, { src: '/static/warper.js' }, { src: '/static/fabric-warp-image.js' }],
   styles: [`//at.alicdn.com/t/font_2211976_2ne5xnzktul.css`],
   chainWebpack(config, { webpack }) {
     config.plugin('extract-css').tap(() => [

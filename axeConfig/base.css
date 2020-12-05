@@ -1,10 +1,11 @@
 @charset "utf-8";
-html{
-  font-size:-webkit-calc(100vw/7.5);
-  font-size:calc(100vw/7.5);
+html {
+  font-size: -webkit-calc(100vw/7.5);
+  font-size: calc(100vw / 7.5);
+  overflow: hidden;
 }
 
-body{
+body {
   font-size: 0.24rem;
 }
 
