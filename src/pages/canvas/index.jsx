@@ -11,6 +11,13 @@ class CanvasPage extends React.Component {
   };
 
   componentDidMount() {
+    document.body.addEventListener(
+      'touchmove',
+      e => {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
     this.handleGetCanvasData();
   }
 
@@ -67,14 +74,12 @@ class CanvasPage extends React.Component {
       dots = [],
       dotscopy,
       idots,
-      count = 30;
-
+      count = 20;
     const canvas = document.getElementById('frontCanvas');
     canvas.height = document.body.clientHeight;
     canvas.width = document.body.clientWidth;
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    //  img.src = require('../canvas/img.jpeg');
     img.src = this.state.imgUrl;
     const maxHeight = 200;
     img.onload = () => {
@@ -86,7 +91,7 @@ class CanvasPage extends React.Component {
         img_w *= imgRatio;
       }
       var left = (canvas.width - img_w) / 2;
-      var top = (canvas.height - img_h) / 2;
+      var top = (canvas.height - img_h) / 4;
 
       img.width = img_w;
       img.height = img_h;
@@ -113,7 +118,13 @@ class CanvasPage extends React.Component {
 
   renderFrontCanvas = ({ img, ctx, canvas, imgRatio, dots, idots, count }) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    dots.forEach(item => {
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgb(68, 151, 102)';
+      ctx.arc(item.x, item.y, 3, 0, Math.PI * 2, false);
+      ctx.stroke();
+    });
     var ndots = matrix.rectsplit(count, dots[0], dots[1], dots[2], dots[3]);
     /**
      * 计算矩阵，同时渲染图片
@@ -138,21 +149,14 @@ class CanvasPage extends React.Component {
       //   ctx.stroke();
       // }
       ctx.clip();
-
-      if (true) {
-        //传入变换前后的点坐标，计算变换矩阵
-        var result = matrix.getMatrix.apply(this, arguments);
-
-        //变形
-        ctx.transform(result.a, result.b, result.c, result.d, result.e, result.f);
-
-        var w = img.width / count;
-        var h = img.height / count;
-
-        //绘制图片
-        ctx.drawImage(img, (vertex.x - idots[0].x) / imgRatio - 1, (vertex.y - idots[0].y) / imgRatio - 1, w / imgRatio + 2, h / imgRatio + 2, vertex.x - 1, vertex.y - 1, w + 2, h + 2);
-      }
-
+      //传入变换前后的点坐标，计算变换矩阵
+      var result = matrix.getMatrix.apply(this, arguments);
+      //变形
+      ctx.transform(result.a, result.b, result.c, result.d, result.e, result.f);
+      var w = img.width / count;
+      var h = img.height / count;
+      //绘制图片
+      ctx.drawImage(img, (vertex.x - idots[0].x) / imgRatio - 1, (vertex.y - idots[0].y) / imgRatio - 1, w / imgRatio + 2, h / imgRatio + 2, vertex.x - 1, vertex.y - 1, w + 2, h + 2);
       ctx.restore();
     }
 
@@ -177,7 +181,7 @@ class CanvasPage extends React.Component {
         renderImage(idot1, dot1, idot2, dot2, idot4, dot4, idot1);
       }
 
-      // if (hasDot) {
+      // if ("hasDot") {
       //   ctx.fillStyle = 'red';
       //   ctx.fillRect(d.x - 1, d.y - 1, 2, 2);
       // }
