@@ -1,5 +1,15 @@
 .canvas-home {
   height: 100%;
+  position: relative;
+  .canvas-home-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  #frontCanvas {
+    position: absolute;
+  }
   .img-list {
     position: fixed;
     z-index: 10;
@@ -11,14 +21,56 @@
     > div {
       flex: 1;
     }
+    .img-icon {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 0.6rem;
+      > div {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-items: center;
+        align-items: center;
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+        background-color: rgb(102, 103, 104);
+        color: rgb(166, 167, 168);
+        .input-file {
+          height: 50px;
+          width: 50px;
+          opacity: 0;
+          position: absolute;
+          z-index: 10;
+          top: 0;
+          left: 0;
+        }
+        span {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          i {
+            font-size: 16px;
+          }
+        }
+      }
+    }
     .img-item {
       overflow-y: scroll;
       display: flex;
       flex-wrap: nowrap;
+      background-color: rgb(61, 62, 63);
       .img-conent {
         height: 100%;
         width: 1.302083rem;
         min-width: 1.302083rem;
+        padding: 0.05rem;
+        border: 2px solid rgb(61, 62, 63);
+      }
+      .active {
+        border: 2px solid rgb(130, 162, 197);
       }
     }
     .img-item::-webkit-scrollbar {

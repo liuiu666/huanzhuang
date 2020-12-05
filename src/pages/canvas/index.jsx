@@ -1,6 +1,9 @@
 import React from 'react';
 import * as matrix from './matrix';
+import { Toast } from 'antd-mobile';
+import classnames from 'classnames';
 import './index.less';
+
 class CanvasPage extends React.Component {
   state = {
     height: document.body.clientHeight,
@@ -8,16 +11,10 @@ class CanvasPage extends React.Component {
     goodsid: this.props.location.query.goodsid || 9900000082,
     imgList: [],
     imgUrl: '',
+    resultImg: '',
   };
 
   componentDidMount() {
-    document.body.addEventListener(
-      'touchmove',
-      e => {
-        e.preventDefault();
-      },
-      { passive: false },
-    );
     this.handleGetCanvasData();
   }
 
@@ -74,14 +71,24 @@ class CanvasPage extends React.Component {
       dots = [],
       dotscopy,
       idots,
-      count = 20;
+      count = 10;
     const canvas = document.getElementById('frontCanvas');
+
     canvas.height = document.body.clientHeight;
     canvas.width = document.body.clientWidth;
+    canvas.addEventListener(
+      'touchmove',
+      e => {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
     const ctx = canvas.getContext('2d');
+    this.ctx = ctx;
     const img = new Image();
     img.src = this.state.imgUrl;
     const maxHeight = 200;
+    // img.setAttribute('crossOrigin', 'sumeizhijianew');
     img.onload = () => {
       let img_w = img.width,
         img_h = img.height;
@@ -125,6 +132,7 @@ class CanvasPage extends React.Component {
       ctx.arc(item.x, item.y, 3, 0, Math.PI * 2, false);
       ctx.stroke();
     });
+
     var ndots = matrix.rectsplit(count, dots[0], dots[1], dots[2], dots[3]);
     /**
      * 计算矩阵，同时渲染图片
@@ -180,7 +188,6 @@ class CanvasPage extends React.Component {
         //绘制三角形的上半部分
         renderImage(idot1, dot1, idot2, dot2, idot4, dot4, idot1);
       }
-
       // if ("hasDot") {
       //   ctx.fillStyle = 'red';
       //   ctx.fillRect(d.x - 1, d.y - 1, 2, 2);
@@ -188,17 +195,141 @@ class CanvasPage extends React.Component {
     });
   };
 
+  handleGetImg = e => {
+    const that = this;
+    if (e.currentTarget.files) {
+      let file = e.currentTarget.files[0];
+      var reader = new FileReader();
+      reader.readAsDataURL(file); //发起异步请求
+      reader.onload = function() {
+        //读取完成后，数据保存在对象的result属性中
+        that.setState({
+          resultImg: this.result,
+        });
+      };
+    }
+  };
+
+  handleHideImg = () => {
+    let { img, ctx, canvas, imgRatio, dots, idots, count } = this.allData;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (this.hideImg) {
+      this.renderFrontCanvas({ img, ctx, canvas, imgRatio, dots, idots, count });
+    }
+    this.hideImg = !this.hideImg;
+  };
+
+  handleFuYuan = () => {
+    this.setState({
+      resultImg: '',
+    });
+    this.renderCanvas();
+  };
+
+  handleSaveImg = () => {
+    const { resultImg } = this.state;
+    try {
+      const canvas = document.getElementById('frontCanvas');
+      let src = canvas.toDataURL('image/png');
+      if (resultImg) {
+        this.convertImageToCanvas(src);
+      } else {
+        this.downImg(src);
+      }
+    } catch (error) {
+      console.error(error);
+      Toast.fail('服务异常！', 1);
+    }
+  };
+
+  downImg = src => {
+    let a = document.createElement('a'); // 生成一个a元素
+    let event = new MouseEvent('click'); // 创建一个单击事件
+    a.download = name || 'photo'; // 设置图片名称
+    a.href = src; // 将生成的URL设置为a.href属性,url可以是base64
+    a.dispatchEvent(event); // 触发a的单击事件
+  };
+
+  convertCanvasToImage(canvas) {
+    var image = new Image();
+    image.src = canvas.toDataURL('image/png');
+    return image;
+  }
+
+  convertImageToCanvas = src => {
+    const { resultImg } = this.state;
+    const that = this;
+    // 创建canvas DOM元素，并设置其宽高和图片一样
+    var canvas = document.createElement('canvas');
+    let image = new Image();
+    image.src = resultImg;
+
+    canvas.height = document.body.clientHeight;
+    canvas.width = document.body.clientWidth;
+
+    let ctx2d = canvas.getContext('2d');
+    image.onload = () => {
+      ctx2d.drawImage(image, 0, 0, canvas.width, canvas.height);
+      draw();
+    };
+    function draw() {
+      var img2 = new Image();
+      img2.src = src;
+      img2.onload = () => {
+        ctx2d.drawImage(img2, 0, 0, canvas.width, canvas.height);
+        const imgs = canvas.toDataURL('image/jpg');
+        that.downImg(imgs);
+      };
+    }
+    // return canvas;
+  };
+
   // 底部图片渲染
   renderImgList() {
     const { imgList } = this.state;
     return (
       <div className="img-list">
-        <div className="img-icon"></div>
+        <div className="img-icon">
+          <div onClick={this.handleGetImg}>
+            <input id="preview" accept=".jpg, .jpeg, .png" className="input-file" type="file" onChange={this.handleGetImg} />
+            <span>
+              <i className="icon-xiangji iconfont"></i>
+            </span>
+            <span>拍实景</span>
+          </div>
+          <div onClick={this.handleHideImg}>
+            <span>
+              <i className="icon-yincang iconfont"> </i>
+            </span>
+            <span>隐窗帘</span>
+          </div>
+          <div>
+            <span>
+              <i className="iconfont icon-xiangpi_huaban1"></i>
+            </span>
+            <span>刷窗帘</span>
+          </div>
+          <div onClick={this.handleFuYuan}>
+            <span>
+              <i className="iconfont icon-web-icon-"></i>
+            </span>
+            <span>复原</span>
+          </div>
+          <div onClick={this.handleSaveImg}>
+            <span>
+              <i className="iconfont icon-baocun"></i>
+            </span>
+            <span>保存</span>
+          </div>
+        </div>
         <div className="img-item">
           {imgList.map((item, index) => (
             <div
               key={index}
-              className="img-conent"
+              className={classnames({
+                'img-conent': true,
+                active: this.state.imgUrl === item.pictureurl,
+              })}
               onClick={() => {
                 this.setState(
                   {
@@ -221,6 +352,7 @@ class CanvasPage extends React.Component {
   render() {
     return (
       <div className="canvas-home">
+        <img className="canvas-home-img" src={this.state.resultImg} />
         <canvas id="frontCanvas" onTouchMove={this.listenCanvas} onTouchStart={this.handleTouchStart}></canvas>
         {this.renderImgList()}
       </div>
