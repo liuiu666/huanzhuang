@@ -8,7 +8,7 @@ class CanvasPage extends React.Component {
   state = {
     height: document.body.clientHeight,
     width: document.body.clientWidth,
-    goodsid: this.props.location.query.goodsid || 9900000082,
+    goodsid: this.props.location.query.goodsid || '',
     imgList: [],
     imgUrl: '',
     resultImg: '',
@@ -22,7 +22,7 @@ class CanvasPage extends React.Component {
   async handleGetCanvasData() {
     const { goodsid } = this.state;
     const response = await AXE_axios.post('/smzj/srCtr/oneTouchPicture', {
-      // goodsid: goodsid, //可传可不传，有值查单个商品图片列表，不传查全部列表
+      goodsid: goodsid, //可传可不传，有值查单个商品图片列表，不传查全部列表
       page: 1,
       rows: 20,
     });
