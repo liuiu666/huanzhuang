@@ -26,7 +26,7 @@ export default defineConfig({
     '@': './src',
   },
   //headScripts: [{ src: '/static/fabric.js' }, { src: '/static/warper.js' }, { src: '/static/fabric-warp-image.js' }],
-  styles: [`//at.alicdn.com/t/font_1185901_tfz5djn9uvn.css`],
+  styles: [`//at.alicdn.com/t/font_1185901_tjdn44ryex.css`],
   chainWebpack(config, { webpack }) {
     config.plugin('extract-css').tap(() => [
       {

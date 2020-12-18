@@ -12,6 +12,7 @@ class CanvasPage extends React.Component {
     imgList: [],
     imgUrl: '',
     resultImg: '',
+    brush: false,
   };
 
   componentDidMount() {
@@ -20,13 +21,17 @@ class CanvasPage extends React.Component {
 
   // 获取图片的列表数据
   async handleGetCanvasData() {
+    Toast.loading('Loading...', 30, () => {
+      console.log('Load complete !!!');
+    });
     const { goodsid } = this.state;
     const response = await AXE_axios.post('/smzj/srCtr/oneTouchPicture', {
       goodsid: goodsid, //可传可不传，有值查单个商品图片列表，不传查全部列表
       page: 1,
-      rows: 20,
+      rows: 200,
     });
     if (response.status === 0 && response.data && response.data.rows.length) {
+      Toast.hide();
       this.setState(
         {
           imgList: response.data.rows || [],
@@ -57,8 +62,15 @@ class CanvasPage extends React.Component {
   };
 
   listenCanvas = e => {
-    if (this.dot) {
-      const { clientX, clientY } = e.touches[0];
+    const { clientX, clientY } = e.touches[0];
+    if (this.state.brush) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(clientX, clientY, 10, 0, 2 * Math.PI);
+      this.ctx.clip();
+      this.ctx.clearRect(0, 0, document.body.clientWidth, document.body.clientHeight);
+      this.ctx.restore();
+    } else if (this.dot) {
       let { img, ctx, canvas, imgRatio, dots, idots, count } = this.allData;
       dots[this.dotIndex].x = clientX;
       dots[this.dotIndex].y = clientY;
@@ -303,7 +315,17 @@ class CanvasPage extends React.Component {
             </span>
             <span>隐窗帘</span>
           </div>
-          <div>
+          <div
+            className={classnames({
+              activeButton: this.state.brush,
+              activeButtonFalse: !this.state.brush,
+            })}
+            onClick={() => {
+              this.setState({
+                brush: !this.state.brush,
+              });
+            }}
+          >
             <span>
               <i className="iconfont icon-xiangpi_huaban1"></i>
             </span>
